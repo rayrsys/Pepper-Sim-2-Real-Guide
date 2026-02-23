@@ -1,0 +1,30 @@
+# Pepper ROS Noetic Setup Guide
+
+This repository contains the environment and instructions for running the **Pepper ROS** simulation within a Docker container.
+
+## 1. Initial Setup
+
+### Extract the Project
+1. Download the project `.zip` file from this repository.
+2. Extract the contents to your local machine.
+3. Open a terminal and navigate to the project directory:
+   ```bash
+   cd /path/to/extracted/folder
+
+### Build
+1. sudo docker build -t pepper_stage1_ros .
+
+### Enable GUI support
+1. xhost +local:docker
+
+### Launch Container
+sudo docker run -it \
+    --env="DISPLAY" \
+    --env="QT_X11_NO_MITSHM=1" \
+    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    pepper_stage1_ros bash
+
+### In container
+roscore &
+export LIBGL_ALWAYS_SOFTWARE=1
+roslaunch <package_name> <simulation_file>.launch
