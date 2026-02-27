@@ -1,13 +1,14 @@
 # Pepper ROS Noetic Setup Guide
 
-This repository contains everything needed to run the **Pepper ROS** Gazebo simulation in Docker. No external images required — builds from scratch on Ubuntu 20.04.
+This repository contains the environment and instructions for running the **Pepper ROS** simulation within a Docker container.
 
-## 1. Build the image
+## 1. Initial Setup
+
+### Pull the base image
+docker pull ghcr.io/00ducky13/pepper_stage1_ros:latest
+
+### Build the image
 docker build -t pepper .
-
-Note: First build will take a while (ROS Noetic + Pepper packages + gzweb).
-
-## 2. Run the container
 
 ### Enable GUI support (Linux with X11)
 xhost +local:docker
@@ -19,7 +20,7 @@ docker run -it --rm \
     -p 8080:8080 \
     pepper
 
-## 3. In the container
+## 2. In the container
 
 ### Launch the simulation (with GUI)
 roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch
