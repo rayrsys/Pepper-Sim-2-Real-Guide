@@ -8,7 +8,7 @@ This repository contains the environment and instructions for running the **Pepp
 docker pull ghcr.io/00ducky13/pepper_stage1_ros:latest
 
 ### Build the image
-docker build -t pepper .
+docker build -t pepper_stage1_ros .
 
 ### Enable GUI support (Linux with X11)
 xhost +local:docker
@@ -18,9 +18,15 @@ docker run -it --rm \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -p 8080:8080 \
-    pepper
+    pepper_stage1_ros
 
 ## 2. In the container
+
+### Run the following commands inside the container
+
+roscore &
+export LIBGL_ALWAYS_SOFTWARE=1
+
 
 ### Launch the simulation (with GUI)
 roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch
