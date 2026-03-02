@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pepper ROS Noetic Setup Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        h1 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            font-size: 2em;
+        }
+        h2 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            font-size: 1.5em;
+        }
+        h3 {
+            font-size: 1.25em;
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 1em;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 85%;
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 100%;
+        }
+        ul {
+            padding-left: 2em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        .note {
+            font-style: italic;
+            color: #586069;
+            margin-bottom: 0.5em;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pepper ROS Noetic Setup Guide</h1>
+    <p>This page contains the environment and instructions for running the <strong>Pepper ROS</strong> simulation within a Docker container.</p>
+
+    <h2>1. Initial Setup</h2>
+
+    <h3>Pull the base image</h3>
+    <span class="note">(Note: You may need to use <code>sudo</code> for Docker commands depending on your system permissions)</span>
+    <pre><code>sudo docker pull ghcr.io/00ducky13/pepper_stage1_ros:latest</code></pre>
+
+    <h3>Enable GUI support (Linux with X11)</h3>
+    <pre><code>xhost +local:docker</code></pre>
+
+    <h3>Launch Container</h3>
+    <p>Run the following command to start the container and enter its terminal:</p>
+    <pre><code>sudo docker run -it --rm \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -p 8080:8080 \
+    ghcr.io/00ducky13/pepper_stage1_ros:latest</code></pre>
+
+    <h2>2. Inside the Container</h2>
+    <p>Once your terminal prompt changes (indicating you are inside the Docker container), run the following to start the ROS core and configure your graphics:</p>
+    
+    <pre><code>roscore &amp;
+export LIBGL_ALWAYS_SOFTWARE=1</code></pre>
+    <span class="note">(Hit <strong>Enter</strong> if you need to get your command prompt back after running <code>roscore &amp;</code>)</span>
+
+    <h3>Launch the Simulation</h3>
+    
+    <p><strong>With GUI:</strong></p>
+    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch</code></pre>
+
+    <p><strong>Headless (View via http://localhost:8080):</strong></p>
+    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch gui:=false</code></pre>
+
+    <h2>Troubleshooting &amp; Common Issues</h2>
+    <ul>
+        <li>
+            <strong><code>permission denied while trying to connect to the Docker daemon socket</code></strong><br>
+            <strong>Cause:</strong> Your user does not have permission to run Docker commands.<br>
+            <strong>Fix:</strong> Prepend your Docker commands with <code>sudo</code> (e.g., <code>sudo docker pull...</code>), or permanently fix this by adding your user to the <code>docker</code> group on your Linux machine.
+        </li>
+        <li>
+            <strong><code>Unable to find image 'pepper:latest' locally</code> or <code>pull access denied</code></strong><br>
+            <strong>Cause:</strong> The <code>docker run</code> command is looking for an image with the wrong name.<br>
+            <strong>Fix:</strong> Make sure you are using the full registry URL at the end of your <code>docker run</code> command: <code>ghcr.io/00ducky13/pepper_stage1_ros:latest</code>. Do not shorten it to just <code>pepper</code>.
+        </li>
+        <li>
+            <strong><code>RLException: [pepper_gazebo_plugin_Y20.launch] is neither a launch file in package...</code></strong><br>
+            <strong>Cause:</strong> You likely changed the internal ROS package names in the <code>roslaunch</code> command to match the new Docker image name.<br>
+            <strong>Fix:</strong> While the <em>Docker image</em> is named <code>pepper_stage1_ros</code>, the <em>ROS packages</em> inside the container still use their original names. Always use <code>roslaunch pepper_gazebo_plugin ...</code> once inside the container.
+        </li>
+        <li>
+            <strong>The GUI doesn't open or throws a display error</strong><br>
+            <strong>Cause:</strong> The container cannot communicate with your host machine's display, or your graphics drivers are clashing with the container.<br>
+            <strong>Fix:</strong> Ensure you ran <code>xhost +local:docker</code> <em>before</em> starting the container. If you are still having issues, make sure you ran <code>export LIBGL_ALWAYS_SOFTWARE=1</code> inside the container to force software rendering. <span class="note">(Note: The <code>xhost</code> command is specific to Linux/X11. Mac or Windows users will need additional software like XQuartz or VcXsrv).</span>
+        </li>
+    </ul>
+
+</body>
+</html>
