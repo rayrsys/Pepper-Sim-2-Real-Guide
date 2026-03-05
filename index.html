@@ -18,54 +18,18 @@
             margin-bottom: 0.5em;
             font-weight: 600;
         }
-        h1 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-            font-size: 2em;
-        }
-        h2 {
-            border-bottom: 1px solid #eaecef;
-            padding-bottom: 0.3em;
-            font-size: 1.5em;
-        }
-        h3 {
-            font-size: 1.25em;
-        }
-        p {
-            margin-top: 0;
-            margin-bottom: 1em;
-        }
-        pre {
-            background-color: #f6f8fa;
-            border-radius: 6px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-        }
-        code {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-            font-size: 85%;
-            background-color: #f6f8fa;
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-            font-size: 100%;
-        }
-        ul {
-            padding-left: 2em;
-        }
-        li {
-            margin-bottom: 0.5em;
-        }
-        .note {
-            font-style: italic;
-            color: #586069;
-            margin-bottom: 0.5em;
-            display: block;
-        }
+        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 2em; }
+        h2 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 1.5em; }
+        h3 { font-size: 1.25em; }
+        p { margin-top: 0; margin-bottom: 1em; }
+        pre { background-color: #f6f8fa; border-radius: 6px; padding: 16px; overflow: auto; line-height: 1.45; }
+        code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 85%; background-color: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; }
+        pre code { background-color: transparent; padding: 0; font-size: 100%; }
+        ul { padding-left: 2em; }
+        li { margin-bottom: 0.5em; }
+        .note { font-style: italic; color: #586069; margin-bottom: 0.5em; display: block; }
+        .btn { display: inline-block; padding: 10px 20px; margin-top: 15px; font-size: 16px; color: #fff; background-color: #2ea44f; border-radius: 6px; text-decoration: none; font-weight: bold; }
+        .btn:hover { background-color: #2c974b; }
     </style>
 </head>
 <body>
@@ -98,12 +62,18 @@ export LIBGL_ALWAYS_SOFTWARE=1</code></pre>
     <span class="note">(Hit <strong>Enter</strong> if you need to get your command prompt back after running <code>roscore &amp;</code>)</span>
 
     <h3>Launch the Simulation</h3>
-    
     <p><strong>With GUI:</strong></p>
     <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch</code></pre>
-
     <p><strong>Headless (View via http://localhost:8080):</strong></p>
     <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch gui:=false</code></pre>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eaecef;">
+
+    <h2>3. Next Steps</h2>
+    <p>Once your Gazebo simulation is up and running, you can move on to actually controlling the robot's base and arms.</p>
+    <a href="control.html" class="btn">Go to the Robot Control Guide ➔</a>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eaecef;">
 
     <h2>Troubleshooting &amp; Common Issues</h2>
     <ul>
