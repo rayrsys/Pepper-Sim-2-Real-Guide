@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controlling Pepper - ROS Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1, h2, h3 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 2.2em; }
+        h2 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 1.5em; }
+        h3 { font-size: 1.25em; }
+        p { margin-top: 0; margin-bottom: 1em; }
+        pre { background-color: #f6f8fa; border-radius: 6px; padding: 16px; overflow: auto; line-height: 1.45; }
+        code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 85%; background-color: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; }
+        pre code { background-color: transparent; padding: 0; font-size: 100%; }
+        .note { font-style: italic; color: #586069; margin-bottom: 0.5em; display: block; }
+        .back-link { font-size: 14px; text-decoration: none; color: #0366d6; font-weight: bold; margin-bottom: 20px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-link">← Back to Setup Guide</a>
+
+    <h1>Interacting with the Pepper Robot</h1>
+    <p>This guide assumes you already have the Pepper Gazebo simulation running in your first terminal. To send commands to Pepper, you need to open a <strong>new terminal window</strong> on your host machine and jump into the running container alongside the simulation.</p>
+
+    <h2>1. Enter the Running Container</h2>
+    <p>Run this command in a new terminal to automatically find the Pepper container and open a bash session inside it:</p>
+    <pre><code>sudo docker exec -it $(sudo docker ps -q -f ancestor=ghcr.io/00ducky13/pepper_stage1_ros:latest) bash</code></pre>
+
+    <h2>2. Method A: Moving the Base (Command Line Publish)</h2>
+    <p>Pepper listens to the <code>/pepper/cmd_vel</code> namespace. To make the robot drive in a circle, we publish a continuous velocity command at 10 Hz:</p>
+    <pre><code>rostopic pub -r 10 /pepper/cmd_vel geometry_msgs/Twist "{linear: {x: 0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}"</code></pre>
+    <span class="note">(Press <code>Ctrl+C</code> in the terminal to stop the command).</span>
+
+    <h2>3. Method B: Keyboard Teleop (RC Car Mode)</h2>
+    <p>You can install the standard ROS teleop package inside the container and use topic remapping to route your keyboard strokes to Pepper's specific topic:</p>
+    <pre><code>apt-get update &amp;&amp; apt-get install ros-noetic-teleop-twist-keyboard -y
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=/pepper/cmd_vel</code></pre>
+    <p>Keep that specific terminal window active and use <code>i</code> (forward), <code>,</code> (backward), <code>j</code>/<code>l</code> (turn left/right), and <code>k</code> (stop).</p>
+
+    <h2>4. Method C: Python Script (Arm Control)</h2>
+    <p>Unlike the base, Pepper's arms use <code>JointTrajectory</code> controllers. Create a python file called <code>wave_arm.py</code> inside the container:</p>
+    <pre><code>cat &lt;&lt; 'EOF' &gt; wave_arm.py
+#!/usr/bin/env python3
+import rospy
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+
+def wave_arm():
+    rospy.init_node('pepper_arm_commander', anonymous=True)
+    
+    # Publish to the Right Arm controller topic
+    pub = rospy.Publisher('/pepper/RightArm_controller/command', JointTrajectory, queue_size=10)
+    
+    # Wait a second for the publisher to properly connect to Gazebo
+    rospy.sleep(1)
+
+    # Create the trajectory message
+    traj = JointTrajectory()
+    traj.joint_names = ['RShoulderPitch', 'RShoulderRoll', 'RElbowYaw', 'RElbowRoll', 'RWristYaw']
+
+    # Target pose in radians
+    point = JointTrajectoryPoint()
+    point.positions = [0.0, -0.5, 0.0, 0.5, 0.0] 
+    point.time_from_start = rospy.Duration(2.0) 
+
+    traj.points.append(point)
+
+    rospy.loginfo("Sending command to lift Pepper's right arm...")
+    pub.publish(traj)
+
+if __name__ == '__main__':
+    try:
+        wave_arm()
+    except rospy.ROSInterruptException:
+        pass
+EOF</code></pre>
+    <p>Make it executable and run it:</p>
+    <pre><code>chmod +x wave_arm.py
+./wave_arm.py</code></pre>
+
+</body>
+</html>
