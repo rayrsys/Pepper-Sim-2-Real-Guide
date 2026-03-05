@@ -5,99 +5,412 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pepper ROS Noetic Setup Guide</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 850px;
+            line-height: 1.7;
+            color: #1a1a1a;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e8e8e8;
+            padding: 0 2rem;
+        }
+        .nav-inner {
+            max-width: 720px;
             margin: 0 auto;
-            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
         }
-        h1, h2, h3 {
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a1a;
+            text-decoration: none;
+            letter-spacing: -0.2px;
+        }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .nav-links a:hover { color: #1a1a1a; background: #f5f5f5; }
+        .nav-links a.active { color: #1a1a1a; background: #f0f0f0; }
+
+        /* ── Container ── */
+        .container { max-width: 720px; margin: 0 auto; padding: 2rem; }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 3rem 0 2rem;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+        }
+        .hero p {
+            color: #666;
+            font-size: 1.05rem;
+        }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-size: 0.75rem;
             font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 2.5rem 0 1rem;
         }
-        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 2em; }
-        h2 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 1.5em; }
-        h3 { font-size: 1.25em; }
-        p { margin-top: 0; margin-bottom: 1em; }
-        pre { background-color: #f6f8fa; border-radius: 6px; padding: 16px; overflow: auto; line-height: 1.45; }
-        code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 85%; background-color: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; }
-        pre code { background-color: transparent; padding: 0; font-size: 100%; }
-        ul { padding-left: 2em; }
-        li { margin-bottom: 0.5em; }
-        .note { font-style: italic; color: #586069; margin-bottom: 0.5em; display: block; }
-        .btn { display: inline-block; padding: 10px 20px; margin-top: 15px; font-size: 16px; color: #fff; background-color: #2ea44f; border-radius: 6px; text-decoration: none; font-weight: bold; }
-        .btn:hover { background-color: #2c974b; }
+
+        /* ── Cards ── */
+        .card {
+            background: #fafafa;
+            border: 1px solid #ebebeb;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: #d0d0d0; }
+
+        /* ── Step indicator ── */
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.6rem;
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .step-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* ── Text ── */
+        p { margin-bottom: 0.6rem; color: #444; }
+        .note {
+            font-size: 0.84rem;
+            color: #888;
+            font-style: italic;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        /* ── Code blocks ── */
+        .code-wrap {
+            position: relative;
+            margin: 0.6rem 0;
+        }
+        pre {
+            background: #f5f5f5;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 0.9rem 1.1rem;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            color: #d14;
+        }
+        pre code { color: #333; }
+        .copy-btn {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #888;
+            font-size: 0.72rem;
+            padding: 3px 9px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .copy-btn:hover { color: #333; border-color: #bbb; }
+
+        /* ── Two-column grid ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .option-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #666;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ── Accordion ── */
+        details {
+            background: #fafafa;
+            border: 1px solid #ebebeb;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.2s;
+        }
+        details:hover { border-color: #d0d0d0; }
+        summary {
+            padding: 0.8rem 1.1rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9rem;
+            list-style: none;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: "+";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: #eee;
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        details[open] summary::before { content: "\2212"; }
+        .accordion-body {
+            padding: 0 1.1rem 1rem;
+            font-size: 0.88rem;
+            color: #555;
+        }
+
+        /* ── CTA ── */
+        .cta-section { text-align: center; padding: 2.5rem 0 1rem; }
+        .btn-cta {
+            display: inline-block;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+            background: #1a1a1a;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-cta:hover { background: #333; }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            font-size: 0.78rem;
+            color: #bbb;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .container { padding: 1.25rem; }
+            nav { padding: 0 1rem; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Pepper ROS Noetic Setup Guide</h1>
-    <p>This page contains the environment and instructions for running the <strong>Pepper ROS</strong> simulation within a Docker container.</p>
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand">Pepper ROS</a>
+            <div class="nav-links">
+                <a href="index.html" class="active">Setup</a>
+                <a href="control.html">Control</a>
+            </div>
+        </div>
+    </nav>
 
-    <h2>1. Initial Setup</h2>
+    <div class="container">
 
-    <h3>Pull the base image</h3>
-    <span class="note">(Note: You may need to use <code>sudo</code> for Docker commands depending on your system permissions)</span>
-    <pre><code>sudo docker pull ghcr.io/00ducky13/pepper_stage1_ros:latest</code></pre>
+        <div class="hero">
+            <h1>Pepper ROS Setup Guide</h1>
+            <p>Get the Pepper robot simulation running inside a Docker container with ROS Noetic and Gazebo.</p>
+        </div>
 
-    <h3>Enable GUI support (Linux with X11)</h3>
-    <pre><code>xhost +local:docker</code></pre>
+        <!-- Initial Setup -->
+        <p class="section-title">Initial Setup</p>
 
-    <h3>Launch Container</h3>
-    <p>Run the following command to start the container and enter its terminal:</p>
-    <pre><code>sudo docker run -it --rm \
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">1</div>
+                <h3>Pull the Base Image</h3>
+            </div>
+            <span class="note">You may need to use <code>sudo</code> for Docker commands depending on your system permissions.</span>
+            <div class="code-wrap">
+                <pre><code>sudo docker pull ghcr.io/00ducky13/pepper_stage1_ros:latest</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">2</div>
+                <h3>Enable GUI Support</h3>
+            </div>
+            <p>Allow Docker to access your display (Linux with X11).</p>
+            <div class="code-wrap">
+                <pre><code>xhost +local:docker</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">3</div>
+                <h3>Launch the Container</h3>
+            </div>
+            <p>Start the container and enter its terminal:</p>
+            <div class="code-wrap">
+                <pre><code>sudo docker run -it --rm \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -p 8080:8080 \
     ghcr.io/00ducky13/pepper_stage1_ros:latest</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </div>
 
-    <h2>2. Inside the Container</h2>
-    <p>Once your terminal prompt changes (indicating you are inside the Docker container), run the following to start the ROS core and configure your graphics:</p>
-    
-    <pre><code>roscore &amp;
+        <!-- Inside the Container -->
+        <p class="section-title">Inside the Container</p>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">4</div>
+                <h3>Start ROS Core</h3>
+            </div>
+            <p>Once your terminal prompt changes (indicating you are inside the Docker container), start the ROS core and configure your graphics:</p>
+            <div class="code-wrap">
+                <pre><code>roscore &amp;
 export LIBGL_ALWAYS_SOFTWARE=1</code></pre>
-    <span class="note">(Hit <strong>Enter</strong> if you need to get your command prompt back after running <code>roscore &amp;</code>)</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <span class="note">Hit Enter if you need to get your command prompt back after running <code>roscore &amp;</code>.</span>
+        </div>
 
-    <h3>Launch the Simulation</h3>
-    <p><strong>With GUI:</strong></p>
-    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch</code></pre>
-    <p><strong>Headless (View via http://localhost:8080):</strong></p>
-    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch gui:=false</code></pre>
+        <p style="color:#888; margin: 1rem 0 0.75rem; font-size: 0.95rem;">Choose a launch mode:</p>
 
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eaecef;">
+        <div class="grid-2">
+            <div class="card">
+                <span class="option-label">With GUI</span>
+                <p>Launch the full Gazebo simulation window.</p>
+                <div class="code-wrap">
+                    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch</code></pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+            <div class="card">
+                <span class="option-label">Headless</span>
+                <p>View the simulation at <code>http://localhost:8080</code>.</p>
+                <div class="code-wrap">
+                    <pre><code>roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_Y20.launch gui:=false</code></pre>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+        </div>
 
-    <h2>3. Next Steps</h2>
-    <p>Once your Gazebo simulation is up and running, you can move on to actually controlling the robot's base and arms.</p>
-    <a href="control.html" class="btn">Go to the Robot Control Guide ➔</a>
+        <!-- CTA -->
+        <div class="cta-section">
+            <p style="color:#888; margin-bottom: 1rem;">Once Gazebo is running, move on to controlling the robot.</p>
+            <a href="control.html" class="btn-cta">Robot Control Guide &rarr;</a>
+        </div>
 
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eaecef;">
+        <!-- Troubleshooting -->
+        <p class="section-title">Troubleshooting</p>
 
-    <h2>Troubleshooting &amp; Common Issues</h2>
-    <ul>
-        <li>
-            <strong><code>permission denied while trying to connect to the Docker daemon socket</code></strong><br>
-            <strong>Cause:</strong> Your user does not have permission to run Docker commands.<br>
-            <strong>Fix:</strong> Prepend your Docker commands with <code>sudo</code> (e.g., <code>sudo docker pull...</code>), or permanently fix this by adding your user to the <code>docker</code> group on your Linux machine.
-        </li>
-        <li>
-            <strong><code>Unable to find image 'pepper:latest' locally</code> or <code>pull access denied</code></strong><br>
-            <strong>Cause:</strong> The <code>docker run</code> command is looking for an image with the wrong name.<br>
-            <strong>Fix:</strong> Make sure you are using the full registry URL at the end of your <code>docker run</code> command: <code>ghcr.io/00ducky13/pepper_stage1_ros:latest</code>. Do not shorten it to just <code>pepper</code>.
-        </li>
-        <li>
-            <strong><code>RLException: [pepper_gazebo_plugin_Y20.launch] is neither a launch file in package...</code></strong><br>
-            <strong>Cause:</strong> You likely changed the internal ROS package names in the <code>roslaunch</code> command to match the new Docker image name.<br>
-            <strong>Fix:</strong> While the <em>Docker image</em> is named <code>pepper_stage1_ros</code>, the <em>ROS packages</em> inside the container still use their original names. Always use <code>roslaunch pepper_gazebo_plugin ...</code> once inside the container.
-        </li>
-        <li>
-            <strong>The GUI doesn't open or throws a display error</strong><br>
-            <strong>Cause:</strong> The container cannot communicate with your host machine's display, or your graphics drivers are clashing with the container.<br>
-            <strong>Fix:</strong> Ensure you ran <code>xhost +local:docker</code> <em>before</em> starting the container. If you are still having issues, make sure you ran <code>export LIBGL_ALWAYS_SOFTWARE=1</code> inside the container to force software rendering. <span class="note">(Note: The <code>xhost</code> command is specific to Linux/X11. Mac or Windows users will need additional software like XQuartz or VcXsrv).</span>
-        </li>
-    </ul>
+        <details>
+            <summary><code>permission denied while trying to connect to the Docker daemon socket</code></summary>
+            <div class="accordion-body">
+                <p><strong>Cause:</strong> Your user does not have permission to run Docker commands.</p>
+                <p><strong>Fix:</strong> Prepend your Docker commands with <code>sudo</code> (e.g., <code>sudo docker pull...</code>), or permanently fix this by adding your user to the <code>docker</code> group on your Linux machine.</p>
+            </div>
+        </details>
+
+        <details>
+            <summary><code>Unable to find image 'pepper:latest' locally</code></summary>
+            <div class="accordion-body">
+                <p><strong>Cause:</strong> The <code>docker run</code> command is looking for an image with the wrong name.</p>
+                <p><strong>Fix:</strong> Make sure you are using the full registry URL at the end of your <code>docker run</code> command: <code>ghcr.io/00ducky13/pepper_stage1_ros:latest</code>. Do not shorten it to just <code>pepper</code>.</p>
+            </div>
+        </details>
+
+        <details>
+            <summary><code>RLException: [pepper_gazebo_plugin_Y20.launch] is neither a launch file...</code></summary>
+            <div class="accordion-body">
+                <p><strong>Cause:</strong> You likely changed the internal ROS package names in the <code>roslaunch</code> command to match the new Docker image name.</p>
+                <p><strong>Fix:</strong> While the <em>Docker image</em> is named <code>pepper_stage1_ros</code>, the <em>ROS packages</em> inside the container still use their original names. Always use <code>roslaunch pepper_gazebo_plugin ...</code> once inside the container.</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>The GUI doesn't open or throws a display error</summary>
+            <div class="accordion-body">
+                <p><strong>Cause:</strong> The container cannot communicate with your host machine's display, or your graphics drivers are clashing with the container.</p>
+                <p><strong>Fix:</strong> Ensure you ran <code>xhost +local:docker</code> <em>before</em> starting the container. If you are still having issues, make sure you ran <code>export LIBGL_ALWAYS_SOFTWARE=1</code> inside the container to force software rendering.</p>
+                <p style="font-style:italic; font-size: 0.85rem; color: #888;">Note: The <code>xhost</code> command is specific to Linux/X11. Mac or Windows users will need additional software like XQuartz or VcXsrv.</p>
+            </div>
+        </details>
+
+        <footer>Pepper ROS Documentation</footer>
+    </div>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.previousElementSibling.querySelector('code');
+            navigator.clipboard.writeText(code.textContent).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+            });
+        }
+    </script>
 
 </body>
 </html>

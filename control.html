@@ -5,62 +5,312 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controlling Pepper - ROS Guide</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #24292e;
-            max-width: 850px;
-            margin: 0 auto;
-            padding: 2rem;
+            line-height: 1.7;
+            color: #1a1a1a;
+            background: #ffffff;
+            min-height: 100vh;
         }
-        h1, h2, h3 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
-        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 2.2em; }
-        h2 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; font-size: 1.5em; }
-        h3 { font-size: 1.25em; }
-        p { margin-top: 0; margin-bottom: 1em; }
-        pre { background-color: #f6f8fa; border-radius: 6px; padding: 16px; overflow: auto; line-height: 1.45; }
-        code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 85%; background-color: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; }
-        pre code { background-color: transparent; padding: 0; font-size: 100%; }
-        .note { font-style: italic; color: #586069; margin-bottom: 0.5em; display: block; }
-        .back-link { font-size: 14px; text-decoration: none; color: #0366d6; font-weight: bold; margin-bottom: 20px; display: inline-block; }
-        .back-link:hover { text-decoration: underline; }
+
+        /* ── Nav ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e8e8e8;
+            padding: 0 2rem;
+        }
+        .nav-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
+        }
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a1a;
+            text-decoration: none;
+            letter-spacing: -0.2px;
+        }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .nav-links a:hover { color: #1a1a1a; background: #f5f5f5; }
+        .nav-links a.active { color: #1a1a1a; background: #f0f0f0; }
+
+        /* ── Container ── */
+        .container { max-width: 720px; margin: 0 auto; padding: 2rem; }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 3rem 0 2rem;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+        }
+        .hero p {
+            color: #666;
+            font-size: 1.05rem;
+        }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 2.5rem 0 1rem;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: #fafafa;
+            border: 1px solid #ebebeb;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: #d0d0d0; }
+
+        /* ── Step indicator ── */
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.6rem;
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .step-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* ── Method label ── */
+        .method-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #666;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ── Text ── */
+        p { margin-bottom: 0.6rem; color: #444; }
+        .note {
+            font-size: 0.84rem;
+            color: #888;
+            font-style: italic;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        /* ── Code blocks ── */
+        .code-wrap {
+            position: relative;
+            margin: 0.6rem 0;
+        }
+        pre {
+            background: #f5f5f5;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 0.9rem 1.1rem;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            color: #d14;
+        }
+        pre code { color: #333; }
+        .copy-btn {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #888;
+            font-size: 0.72rem;
+            padding: 3px 9px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .copy-btn:hover { color: #333; border-color: #bbb; }
+
+        /* ── Keyboard keys ── */
+        kbd {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-family: SFMono-Regular, Consolas, monospace;
+            font-size: 0.82rem;
+            color: #333;
+        }
+
+        /* ── Back link ── */
+        .back-cta {
+            display: inline-block;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: color 0.15s, border-color 0.15s;
+            margin-top: 2rem;
+        }
+        .back-cta:hover { color: #1a1a1a; border-color: #bbb; }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 2.5rem 0 1rem;
+            font-size: 0.78rem;
+            color: #bbb;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .container { padding: 1.25rem; }
+            nav { padding: 0 1rem; }
+        }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-link">← Back to Setup Guide</a>
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand">Pepper ROS</a>
+            <div class="nav-links">
+                <a href="index.html">Setup</a>
+                <a href="control.html" class="active">Control</a>
+            </div>
+        </div>
+    </nav>
 
-    <h1>Interacting with the Pepper Robot</h1>
-    <p>This guide assumes you already have the Pepper Gazebo simulation running in your first terminal. To send commands to Pepper, you need to open a <strong>new terminal window</strong> on your host machine and jump into the running container alongside the simulation.</p>
+    <div class="container">
 
-    <h2>1. Enter the Running Container</h2>
-    <p>Run this command in a new terminal to automatically find the Pepper container and open a bash session inside it:</p>
-    <pre><code>sudo docker exec -it $(sudo docker ps -q -f ancestor=ghcr.io/00ducky13/pepper_stage1_ros:latest) bash</code></pre>
+        <div class="hero">
+            <h1>Interacting with Pepper</h1>
+            <p>Control the robot's base and arms from a second terminal connected to the running simulation container.</p>
+        </div>
 
-    <h2>2. Method A: Moving the Base (Command Line Publish)</h2>
-    <p>Pepper listens to the <code>/pepper/cmd_vel</code> namespace. To make the robot drive in a circle, we publish a continuous velocity command at 10 Hz:</p>
-    <pre><code>rostopic pub -r 10 /pepper/cmd_vel geometry_msgs/Twist "{linear: {x: 0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}"</code></pre>
-    <span class="note">(Press <code>Ctrl+C</code> in the terminal to stop the command).</span>
+        <!-- Getting Started -->
+        <p class="section-title">Getting Started</p>
 
-    <h2>3. Method B: Keyboard Teleop (RC Car Mode)</h2>
-    <p>You can install the standard ROS teleop package inside the container and use topic remapping to route your keyboard strokes to Pepper's specific topic:</p>
-    <pre><code>apt-get update &amp;&amp; apt-get install ros-noetic-teleop-twist-keyboard -y
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">1</div>
+                <h3>Enter the Running Container</h3>
+            </div>
+            <p>Open a <strong>new terminal window</strong> on your host machine and run this command to find the Pepper container and open a bash session inside it:</p>
+            <div class="code-wrap">
+                <pre><code>sudo docker exec -it $(sudo docker ps -q -f ancestor=ghcr.io/00ducky13/pepper_stage1_ros:latest) bash</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </div>
+
+        <!-- Control Methods -->
+        <p class="section-title">Control Methods</p>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">A</div>
+                <h3>Moving the Base (Command Line Publish)</h3>
+            </div>
+            <span class="method-label">rostopic pub</span>
+            <p>Pepper listens to the <code>/pepper/cmd_vel</code> namespace. To make the robot drive in a circle, publish a continuous velocity command at 10 Hz:</p>
+            <div class="code-wrap">
+                <pre><code>rostopic pub -r 10 /pepper/cmd_vel geometry_msgs/Twist "{linear: {x: 0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}"</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <span class="note">Press <kbd>Ctrl+C</kbd> in the terminal to stop the command.</span>
+        </div>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">B</div>
+                <h3>Keyboard Teleop (RC Car Mode)</h3>
+            </div>
+            <span class="method-label">teleop_twist_keyboard</span>
+            <p>Install the standard ROS teleop package inside the container and use topic remapping to route your keyboard strokes to Pepper's specific topic:</p>
+            <div class="code-wrap">
+                <pre><code>apt-get update &amp;&amp; apt-get install ros-noetic-teleop-twist-keyboard -y
 rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=/pepper/cmd_vel</code></pre>
-    <p>Keep that specific terminal window active and use <code>i</code> (forward), <code>,</code> (backward), <code>j</code>/<code>l</code> (turn left/right), and <code>k</code> (stop).</p>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <p>Keep that terminal window active and use these keys:</p>
+            <p>
+                <kbd>i</kbd> forward &nbsp;
+                <kbd>,</kbd> backward &nbsp;
+                <kbd>j</kbd> turn left &nbsp;
+                <kbd>l</kbd> turn right &nbsp;
+                <kbd>k</kbd> stop
+            </p>
+        </div>
 
-    <h2>4. Method C: Python Script (Arm Control)</h2>
-    <p>Unlike the base, Pepper's arms use <code>JointTrajectory</code> controllers. Create a python file called <code>wave_arm.py</code> inside the container:</p>
-    <pre><code>cat &lt;&lt; 'EOF' &gt; wave_arm.py
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">C</div>
+                <h3>Python Script (Arm Control)</h3>
+            </div>
+            <span class="method-label">JointTrajectory</span>
+            <p>Unlike the base, Pepper's arms use <code>JointTrajectory</code> controllers. Create a Python file called <code>wave_arm.py</code> inside the container:</p>
+            <div class="code-wrap">
+                <pre><code>cat &lt;&lt; 'EOF' &gt; wave_arm.py
 #!/usr/bin/env python3
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 def wave_arm():
     rospy.init_node('pepper_arm_commander', anonymous=True)
-    
+
     # Publish to the Right Arm controller topic
     pub = rospy.Publisher('/pepper/RightArm_controller/command', JointTrajectory, queue_size=10)
-    
+
     # Wait a second for the publisher to properly connect to Gazebo
     rospy.sleep(1)
 
@@ -70,8 +320,8 @@ def wave_arm():
 
     # Target pose in radians
     point = JointTrajectoryPoint()
-    point.positions = [0.0, -0.5, 0.0, 0.5, 0.0] 
-    point.time_from_start = rospy.Duration(2.0) 
+    point.positions = [0.0, -0.5, 0.0, 0.5, 0.0]
+    point.time_from_start = rospy.Duration(2.0)
 
     traj.points.append(point)
 
@@ -84,9 +334,32 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         pass
 EOF</code></pre>
-    <p>Make it executable and run it:</p>
-    <pre><code>chmod +x wave_arm.py
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <p>Make it executable and run it:</p>
+            <div class="code-wrap">
+                <pre><code>chmod +x wave_arm.py
 ./wave_arm.py</code></pre>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="index.html" class="back-cta">&larr; Back to Setup Guide</a>
+        </div>
+
+        <footer>Pepper ROS Documentation</footer>
+    </div>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.previousElementSibling.querySelector('code');
+            navigator.clipboard.writeText(code.textContent).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+            });
+        }
+    </script>
 
 </body>
 </html>
