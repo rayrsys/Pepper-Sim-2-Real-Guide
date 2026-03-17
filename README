@@ -1,3 +1,7 @@
-# follow the website
+# follow the website to set up the Gazebo docker image and pepper
 
 https://rayrsys.github.io/Pepper/
+
+# We are working on connecting the physical robot to to gazebo to ease the process for doing research with the pepper robot.
+
+In the next release we will add guidelines to connect to the physical robot and release scripts to sue ros to sync control between the physical and simulated robot.
